@@ -8,7 +8,7 @@ function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
   rootElem.textContent = "";
 
-  const container = document.createElement("div");
+const container = document.createElement("div");
   container.className = "episodes-container";
 
   episodeList.forEach((episode) => {
@@ -26,8 +26,12 @@ function makePageForEpisodes(episodeList) {
 
     container.appendChild(card);
   });
+ 
 
   rootElem.appendChild(container); 
+  const footer = document.createElement("footer");
+  footer.innerHTML = `Data originally from <a href="https://tvmaze.com/" target="_blank">TVMaze.com</a>`;
+  rootElem.appendChild(footer);
 }
 
 window.onload = setup;

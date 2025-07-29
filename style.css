@@ -1,3 +1,31 @@
 #root {
-  color: red;
+ display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 1rem;
+  background-color: #f4f4f4;
+}
+
+.episode-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.episode-card img {
+  width: 100%;
+  border-radius: 4px;
+}
+
+footer {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #333;
 }
