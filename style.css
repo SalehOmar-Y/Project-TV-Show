@@ -1,7 +1,5 @@
 #root {
- display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+ padding: 1rem;
 }
 
 body {
@@ -21,6 +19,12 @@ body {
   width: 100%;
   border-radius: 4px;
 }
+
+.episodes-container {
+  display: grid;           
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));  gap: 1rem;               /* space between cards */
+}
+
 
 footer {
   grid-column: 1 / -1;
