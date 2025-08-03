@@ -7,17 +7,19 @@ function createEpisodeCard(episode) {
   const episodeCard = document.createElement("div");
   episodeCard.className = "episode-card";
 
-    const episodeTitle = `S${String(episode.season).padStart(2, '0')}E${String(episode.number).padStart(2, '0')}`;
+  const episodeTitle = `S${String(episode.season).padStart(2, "0")}E${String(
+    episode.number
+  ).padStart(2, "0")}`;
 
-    episodeCard.innerHTML = `
-      <img src="${episode.image?.medium || ''}" alt="${episode.name}" />
+  episodeCard.innerHTML = `
+      <img src="${episode.image?.medium || ""}" alt="${episode.name}" />
       <h2>${episodeTitle} - ${episode.name}</h2>
-      <p>${episode.summary?.replace(/<[^>]*>/g, '')}</p>
+      <p>${episode.summary?.replace(/<[^>]*>/g, "")}</p>
       <a href="${episode.url}" target="_blank">View on TVMaze</a>
     `;
 
-    return episodeCard;
-  }
+  return episodeCard;
+}
 
 function render() {
   const rootElem = document.getElementById("root");
@@ -35,9 +37,16 @@ function render() {
   rootElem.appendChild(footer);
 }
 
+// we need to get the search filed from the DOM
+const input = document.getElementById("q");
+// we need to listen to the event when user type
+input.addEventListener("keyup", function () {
+  console.log("key pressed");
+});
+
 function setup() {
   state.episodes = getAllEpisodes();
-  render();;
-} 
+  render();
+}
 
 window.onload = setup;
