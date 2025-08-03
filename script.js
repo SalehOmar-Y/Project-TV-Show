@@ -31,7 +31,9 @@ function render() {
 
   // filtering the episodes
   const filteredEpisodes = state.episodes.filter(function(episode) {
-    return episode.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ;
+    const titleMatches = episode.name.toLowerCase().includes(state.searchTerm.toLowerCase());
+    const summaryMatches = episode.summary.toLowerCase().includes(state.searchTerm.toLowerCase());
+    return titleMatches || summaryMatches;
   });
 
   // update the filtered-info tag by showing how many episodes matched
