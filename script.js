@@ -1,6 +1,7 @@
 //You can edit ALL of the code here
 const state = {
   episodes: [],
+  searchTerm: "",
 };
 
 function createEpisodeCard(episode) {
@@ -28,7 +29,12 @@ function render() {
   const container = document.createElement("div");
   container.className = "episodes-container";
 
-  const allEpisodeCards = state.episodes.map(createEpisodeCard);
+  // filtering the episodes
+  const filteredEpisodes = state.episodes.filter(function(episode) {
+    return episode.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ;
+  });
+
+  const allEpisodeCards = filteredEpisodes.map(createEpisodeCard);
   container.append(...allEpisodeCards);
   rootElem.appendChild(container);
 
@@ -41,7 +47,9 @@ function render() {
 const input = document.getElementById("q");
 // we need to listen to the event when user type
 input.addEventListener("keyup", function () {
-  console.log("key pressed");
+  // update the searchTerm
+  state.searchTerm = input.value;
+  render();
 });
 
 function setup() {
