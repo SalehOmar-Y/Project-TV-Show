@@ -22,9 +22,14 @@ body {
 
 .episodes-container {
   display: grid;           
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));  gap: 1rem;               /* space between cards */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));  gap: 1rem;  /* space between cards */
 }
 
+#filtered-info {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
 
 footer {
   grid-column: 1 / -1;
