@@ -4,19 +4,19 @@ const state = {
 };
 
 function createEpisodeCard(episode) {
-  const card = document.createElement("div");
-  card.className = "episode-card";
+  const episodeCard = document.createElement("div");
+  episodeCard.className = "episode-card";
 
-    const code = `S${String(episode.season).padStart(2, '0')}E${String(episode.number).padStart(2, '0')}`;
+    const episodeTitle = `S${String(episode.season).padStart(2, '0')}E${String(episode.number).padStart(2, '0')}`;
 
-    card.innerHTML = `
+    episodeCard.innerHTML = `
       <img src="${episode.image?.medium || ''}" alt="${episode.name}" />
-      <h2>${code} - ${episode.name}</h2>
+      <h2>${episodeTitle} - ${episode.name}</h2>
       <p>${episode.summary?.replace(/<[^>]*>/g, '')}</p>
       <a href="${episode.url}" target="_blank">View on TVMaze</a>
     `;
 
-    return card;
+    return episodeCard;
   }
 
 function render() {
