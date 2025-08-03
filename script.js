@@ -34,6 +34,10 @@ function render() {
     return episode.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ;
   });
 
+  // update the filtered-info tag by showing how many episodes matched
+  const filteredMessage = document.getElementById("filtered-info");
+  filteredMessage.textContent = `Displaying ${filteredEpisodes.length}/${state.episodes.length}`;
+
   const allEpisodeCards = filteredEpisodes.map(createEpisodeCard);
   container.append(...allEpisodeCards);
   rootElem.appendChild(container);
