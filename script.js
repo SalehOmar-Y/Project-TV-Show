@@ -1,4 +1,3 @@
-//You can edit ALL of the code here
 const state = {
   episodes: [],
   searchTerm: "",
@@ -7,6 +6,7 @@ const state = {
 function createEpisodeCard(episode) {
   const episodeCard = document.createElement("div");
   episodeCard.className = "episode-card";
+  episodeCard.id = `episode-${episode.id}`;
 
   const episodeTitle = `S${String(episode.season).padStart(2, "0")}E${String(
     episode.number
@@ -30,9 +30,13 @@ function render() {
   container.className = "episodes-container";
 
   // filtering the episodes
-  const filteredEpisodes = state.episodes.filter(function(episode) {
-    const titleMatches = episode.name.toLowerCase().includes(state.searchTerm.toLowerCase());
-    const summaryMatches = episode.summary.toLowerCase().includes(state.searchTerm.toLowerCase());
+  const filteredEpisodes = state.episodes.filter(function (episode) {
+    const titleMatches = episode.name
+      .toLowerCase()
+      .includes(state.searchTerm.toLowerCase());
+    const summaryMatches = episode.summary
+      .toLowerCase()
+      .includes(state.searchTerm.toLowerCase());
     return titleMatches || summaryMatches;
   });
 
@@ -58,9 +62,33 @@ input.addEventListener("keyup", function () {
   render();
 });
 
+function dropDownSelector() {
+  const selectField = document.getElementById("episode-selection");
+  // create options
+  state.episodes.forEach((episode) => {
+    const newOption = document.createElement("option");
+    newOption.value = episode.id;
+    newOption.textContent = `S${String(episode.season).padStart(
+      2,
+      "0"
+    )}E${String(episode.number).padStart(2, "0")} - ${episode.name}`;
+    selectField.append(newOption);
+  });
+
+  // Scroll to episode when selected
+  selectField.addEventListener("change", function (event) {
+    const selectedId = event.target.value;
+    if (!selectedId) return;
+    const episodeElement = document.getElementById(`episode-${selectedId}`);
+    if (episodeElement) {
+      episodeElement.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+}
 function setup() {
   state.episodes = getAllEpisodes();
   render();
+  dropDownSelector();
 }
 
 window.onload = setup;
