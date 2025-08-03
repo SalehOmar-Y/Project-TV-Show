@@ -26,8 +26,8 @@ function render() {
   const container = document.createElement("div");
   container.className = "episodes-container";
 
-  const cards = state.episodes.map(createEpisodeCard);
-  container.append(...cards);
+  const allEpisodeCards = state.episodes.map(createEpisodeCard);
+  container.append(...allEpisodeCards);
   rootElem.appendChild(container);
 
   const footer = document.createElement("footer");
