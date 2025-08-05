@@ -38,6 +38,15 @@ function render() {
   const rootElem = document.getElementById("root"); // get the root element where we will render everything
   rootElem.textContent = ""; // Clear the page
 
+  if (state.episodes.length === 0) {
+    // if there are no episodes, show a loading message
+    const loadingMessage = document.createElement("div");
+    loadingMessage.className = "loading-message"; // add a class for styling
+    loadingMessage.textContent = "Loading episodes, please wait..."; // set the loading message
+    rootElem.appendChild(loadingMessage); // add the loading message to the root element
+    return; // stop rendering further
+  }
+
   const container = document.createElement("div"); // create a new container for the episodes
   container.className = "episodes-container"; // add a class for styling
 
@@ -103,10 +112,15 @@ function dropDownSelector() {
 
 // initialize the app when the page loads
 function setup() {
-  fetchFilms().then(function (episodes) {
+  render("Loading episodes, please wait..."); // render a loading message
+  fetchFilms()
+  .then(function (episodes) {
   state.episodes = episodes; // save the fetched episodes to the state
   render(); // render the initial state
   dropDownSelector(); // populate the dropdown selector
+})
+.catch(function (error) {
+  console.error("Error fetching episodes. Please try again later.");
 });
 }
 // run the setup function when the page loads
