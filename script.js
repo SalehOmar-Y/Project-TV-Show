@@ -6,7 +6,7 @@ const state = {
 };
 
 // Fetch all episodes for the show with ID 82 from the TVMaze API
-function fetchFilms() {
+function fetchEpisodes() {
   return fetch("https://api.tvmaze.com/shows/82/episodes").then(function (
     data
   ) {
@@ -139,7 +139,7 @@ function episodesDropDownSelector() {
 // initialize the app when the page loads
 function setup() {
   render("Loading episodes, please wait..."); // render a loading message
-  fetchFilms()
+  fetchEpisodes()
     .then(function (episodes) {
       state.episodes = episodes; // save the fetched episodes to the state
       render(); // render the initial state
