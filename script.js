@@ -20,7 +20,8 @@ function fetchShows() {
   })
 }
 fetchShows().then(function (shows) {
-  state.shows = shows
+  state.shows = shows;
+  console.log( state.shows)
 })
 
 // Create a single episode card element from an episode object
@@ -101,9 +102,20 @@ input.addEventListener("keyup", function () {
   state.searchTerm = input.value;
   render();
 });
+// Create a dropdown selector for shows
+function showsDropDownSelector() {
+  const showSelection = document.getElementById("show-selection");
+  // create options
+  state.shows.forEach((show) => {
+    const newOption = document.createElement("option");
+    newOption.value = show.id;
+    newOption.textContent = show.name;
+    showSelection.append(newOption);
 
+  });
+}
 // Create a dropdown selector for episodes
-function dropDownSelector() {
+function episodesDropDownSelector() {
   const selectField = document.getElementById("episode-selection");
   // create options
   state.episodes.forEach((episode) => {
@@ -131,7 +143,8 @@ function setup() {
     .then(function (episodes) {
       state.episodes = episodes; // save the fetched episodes to the state
       render(); // render the initial state
-      dropDownSelector(); // populate the dropdown selector
+      episodesDropDownSelector(); // populate the episodes dropdown selector
+      showsDropDownSelector(); // populate the shows dropdown selector
     })
     .catch(function (error) {
       const root = document.getElementById("root");
