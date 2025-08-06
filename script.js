@@ -1,4 +1,5 @@
 const state = {
+  shows: [],
   episodes: [],
   searchTerm: "",
   selectedEpisodeId: "",
@@ -12,6 +13,15 @@ function fetchFilms() {
     return data.json();
   });
 }
+// we need to fetch shows using url 
+function fetchShows() {
+  return fetch("https://api.tvmaze.com/shows").then(function(data) {
+    return data.json();
+  })
+}
+fetchShows().then(function (shows) {
+  state.shows = shows
+})
 
 // Create a single episode card element from an episode object
 function createEpisodeCard(episode) {
