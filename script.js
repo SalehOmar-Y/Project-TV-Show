@@ -2,12 +2,14 @@ const state = {
   episodes: [],
   searchTerm: "",
 };
- 
+
 // Fetch all episodes for the show with ID 82 from the TVMaze API
 function fetchFilms() {
- return fetch("https://api.tvmaze.com/shows/82/episodes").then(function (data)
- {return data.json()}
-);
+  return fetch("https://api.tvmaze.com/shows/82/episodes").then(function (
+    data
+  ) {
+    return data.json();
+  });
 }
 
 // Create a single episode card element from an episode object
@@ -15,7 +17,6 @@ function createEpisodeCard(episode) {
   const episodeCard = document.createElement("div"); // create a new container for the episode
   episodeCard.className = "episode-card"; // add a class for styling
   episodeCard.id = `episode-${episode.id}`; // set an ID for easy reference
-
 
   // Format the episode title as "S01E03"
   const episodeTitle = `S${String(episode.season).padStart(2, "0")}E${String(
@@ -106,7 +107,7 @@ function dropDownSelector() {
     const episodeElement = document.getElementById(`episode-${selectedId}`);
     if (episodeElement) {
       episodeElement.scrollIntoView({ behavior: "smooth" }); // smoothly scroll to the selected episode
-}
+    }
   });
 }
 
@@ -114,14 +115,15 @@ function dropDownSelector() {
 function setup() {
   render("Loading episodes, please wait..."); // render a loading message
   fetchFilms()
-  .then(function (episodes) {
-  state.episodes = episodes; // save the fetched episodes to the state
-  render(); // render the initial state
-  dropDownSelector(); // populate the dropdown selector
-})
-.catch(function (error) {
-  console.error("Error fetching episodes. Please try again later.");
-});
+    .then(function (episodes) {
+      state.episodes = episodes; // save the fetched episodes to the state
+      render(); // render the initial state
+      dropDownSelector(); // populate the dropdown selector
+    })
+    .catch(function (error) {
+      const root = document.getElementById("root");
+      root.textContent = "Sorry, there was a problem loading episodes.";
+    });
 }
 // run the setup function when the page loads
 window.onload = setup;
