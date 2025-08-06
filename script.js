@@ -1,6 +1,7 @@
 const state = {
   episodes: [],
   searchTerm: "",
+  selectedEpisodeId: "",
 };
 
 // Fetch all episodes for the show with ID 82 from the TVMaze API
@@ -53,6 +54,11 @@ function render() {
 
   // filtering the episodes
   const filteredEpisodes = state.episodes.filter(function (episode) {
+    if (state.selectedEpisodeId) {
+      // Return true only if episode.id matches the selected ID
+      return episode.id === Number(state.selectedEpisodeId);
+    }
+    // Otherwise, filter by search term as before
     const titleMatches = episode.name
       .toLowerCase() // match the search term in the title
       .includes(state.searchTerm.toLowerCase());
@@ -103,11 +109,8 @@ function dropDownSelector() {
   // Scroll to episode when selected
   selectField.addEventListener("change", function (event) {
     const selectedId = event.target.value; // get the selected episode ID
-    if (!selectedId) return; // if no episode is selected, do nothing
-    const episodeElement = document.getElementById(`episode-${selectedId}`);
-    if (episodeElement) {
-      episodeElement.scrollIntoView({ behavior: "smooth" }); // smoothly scroll to the selected episode
-    }
+    state.selectedEpisodeId = selectedId === "all" ? "" : selectedId;
+    render()
   });
 }
 
