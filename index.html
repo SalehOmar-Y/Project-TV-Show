@@ -10,15 +10,17 @@
 
   <body>
     <div class="controls">
-      <input type="search" id="q" name="q" placeholder="Search term" />
-      <select id="episode-selection">
-        <option value="all">All Episodes</option>
+      <select id="show-selection">
+        <option value="label-message">Select Show</option>
       </select>
+      <select id="episode-selection">
+        <option value="">All Episodes</option>
+      </select>
+      <input type="search" id="q" name="q" placeholder="Search term" />
     </div>
     <p id="filtered-info"></p>
-    
-    <div id="root"></div>
 
+    <div id="root"></div>
 
     <!-- Loads YOUR javascript code -->
     <script src="script.js"></script>
