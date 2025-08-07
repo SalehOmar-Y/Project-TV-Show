@@ -153,7 +153,7 @@ function showsDropDownSelector() {
   defaultOption.value = "";
   defaultOption.textContent = "All Shows";
   showSelection.append(defaultOption);
-  
+
   // Order the shows alphabetically
   const alphabeticallyOrderedShows = [...state.shows].sort((a, b) =>
     a.name.localeCompare(b.name)
@@ -174,10 +174,17 @@ function showsDropDownSelector() {
       state.selectedEpisodeId = "";
       state.searchTerm = "";
       input.value = "";
+
+      //  Clear episode dropdown
+      const episodeSelection = document.getElementById("episode-selection");
+      episodeSelection.innerHTML = ""; 
+      const defaultEpisodeOption = document.createElement("option");
+      defaultEpisodeOption.value = "";
+      defaultEpisodeOption.textContent = "Select Episode";
+      episodeSelection.append(defaultEpisodeOption);
       render();
       return;
     }
-
     if (showId) {
       fetchEpisodes(showId).then((episodes) => {
         state.episodes = episodes;
@@ -188,7 +195,7 @@ function showsDropDownSelector() {
         episodesDropDownSelector();
       })
       .catch((error) => {
-        console.error("Failed to fetch episodes:", error);
+        console.error("Sorry, there was a problem loading episodes.", error);
       })
 
       
@@ -226,18 +233,6 @@ function setup() {
     render(); // render the shows only
     showsDropDownSelector();
   });
-  // render("Loading episodes, please wait..."); // render a loading message
-  // fetchEpisodes()
-  //   .then(function (episodes) {
-  //     state.episodes = episodes; // save the fetched episodes to the state
-  //     render(); // render the initial state
-  //     episodesDropDownSelector(); // populate the episodes dropdown selector
-  //     showsDropDownSelector(); // populate the shows dropdown selector
-  //   })
-  //   .catch(function (error) {
-  //     const root = document.getElementById("root");
-  //     root.textContent = "Sorry, there was a problem loading episodes.";
-  //   });
 }
 // run the setup function when the page loads
 window.onload = setup;
