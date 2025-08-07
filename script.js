@@ -3,27 +3,29 @@ const state = {
   episodes: [],
   searchTerm: "",
   selectedEpisodeId: "",
+  selectedShowId: null,
 };
+const episodeCache = {};
 
-// Fetch all episodes for the show with ID 82 from the TVMaze API
-function fetchEpisodes() {
-  return fetch("https://api.tvmaze.com/shows/82/episodes").then(function (
-    data
-  ) {
-    return data.json();
-  });
+// Fetch all episodes for the show with ID
+function fetchEpisodes(showId) {
+  if (episodeCache[showId]) {
+    return Promise.resolve(episodeCache[showId]); // return cached
+  }
+  return fetch(`https://api.tvmaze.com/shows/${showId}/episodes`)
+    .then((response) => response.json())
+    .then((data) => {
+      episodeCache[showId] = data; // ✅ store in cache
+      return data;
+    });
 }
+
 // we need to fetch shows using url
 function fetchShows() {
   return fetch("https://api.tvmaze.com/shows").then(function (data) {
     return data.json();
   });
 }
-fetchShows().then(function (shows) {
-  state.shows = shows;
-  // console.log(state.shows);
-  render(state.shows); // render the initial state
-});
 
 // Create a single episode card element from an episode object
 function createEpisodeCard(episode) {
@@ -47,10 +49,38 @@ function createEpisodeCard(episode) {
   return episodeCard; // return the full DOM  element
 }
 
+function createShowCard(show) {
+  const showCard = document.createElement("div"); // create a new container for the show
+  showCard.className = "show-card"; // add a class for styling
+  showCard.id = `show-${show.id}`; // set an ID for easy reference
+
+  // Format the show title
+  const showTitle = `${String(show.name)}`;
+
+  // build the HTML structure for the show card
+  showCard.innerHTML = `
+      <h2>${showTitle}</h2>
+      <img src="${show.image?.medium || ""}" alt="${show.name}" />
+      <p>${show.summary?.replace(/<[^>]*>/g, "")}</p>
+      <a href="${show.url}" target="_blank">View on TVMaze</a>
+    `;
+
+  return showCard; // return the full DOM  element
+}
+
 // render the full page based on the current state
 function render() {
   const rootElem = document.getElementById("root"); // get the root element where we will render everything
   rootElem.textContent = ""; // Clear the page
+
+  if (state.shows.length === 0) {
+    // if there are no episodes, show a loading message
+    const loadingMessage = document.createElement("div");
+    loadingMessage.className = "loading-message"; // add a class for styling
+    loadingMessage.textContent = "Loading shows, please wait..."; // set the loading message
+    rootElem.appendChild(loadingMessage); // add the loading message to the root element
+    return; // stop rendering further
+  }
 
   if (state.episodes.length === 0) {
     // if there are no episodes, show a loading message
@@ -60,6 +90,8 @@ function render() {
     rootElem.appendChild(loadingMessage); // add the loading message to the root element
     return; // stop rendering further
   }
+  const showsContainer = document.createElement("div"); // create a new container for the shows
+  showsContainer.className = "shows-container"; // add a class for styling
 
   const container = document.createElement("div"); // create a new container for the episodes
   container.className = "episodes-container"; // add a class for styling
@@ -83,6 +115,12 @@ function render() {
   // update the filtered-info tag by showing how many episodes matched
   const filteredMessage = document.getElementById("filtered-info");
   filteredMessage.textContent = `Displaying ${filteredEpisodes.length}/${state.episodes.length}`;
+
+  // create a card for each show
+  console.log(state.shows);
+  const allShowsCards = state.shows.map(createShowCard);
+  showsContainer.append(...allShowsCards); // add all show cards to the container
+  rootElem.appendChild(showsContainer); // add the container to the root element
 
   // create a card for each episode that matched the search term
   const allEpisodeCards = filteredEpisodes.map(createEpisodeCard);
@@ -117,6 +155,16 @@ function showsDropDownSelector() {
     newOption.textContent = show.name;
     showSelection.append(newOption);
   });
+  showSelection.addEventListener("change", function (event) {
+    const showId = event.target.value;
+    if (showId) {
+      fetchEpisodes(showId).then((episodes) => {
+        state.episodes = episodes;
+        state.selectedShowId = null;
+        render();
+      });
+    }
+  });
 }
 // Create a dropdown selector for episodes
 function episodesDropDownSelector() {
@@ -144,7 +192,8 @@ function episodesDropDownSelector() {
 function setup() {
   fetchShows().then(function (shows) {
     state.shows = shows;
-    render(state.shows); // render the initial state
+    render(); // render the initial state
+    showsDropDownSelector();
   });
   render("Loading episodes, please wait..."); // render a loading message
   fetchEpisodes()
