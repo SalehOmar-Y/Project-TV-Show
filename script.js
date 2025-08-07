@@ -13,16 +13,17 @@ function fetchEpisodes() {
     return data.json();
   });
 }
-// we need to fetch shows using url 
+// we need to fetch shows using url
 function fetchShows() {
-  return fetch("https://api.tvmaze.com/shows").then(function(data) {
+  return fetch("https://api.tvmaze.com/shows").then(function (data) {
     return data.json();
-  })
+  });
 }
 fetchShows().then(function (shows) {
   state.shows = shows;
-  console.log( state.shows)
-})
+  // console.log(state.shows);
+  render(state.shows); // render the initial state
+});
 
 // Create a single episode card element from an episode object
 function createEpisodeCard(episode) {
@@ -105,13 +106,16 @@ input.addEventListener("keyup", function () {
 // Create a dropdown selector for shows
 function showsDropDownSelector() {
   const showSelection = document.getElementById("show-selection");
+  // order the shows alphabetically
+  const alphabeticallyOrderedShows = [...state.shows].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
   // create options
-  state.shows.forEach((show) => {
+  alphabeticallyOrderedShows.sort().forEach((show) => {
     const newOption = document.createElement("option");
     newOption.value = show.id;
     newOption.textContent = show.name;
     showSelection.append(newOption);
-
   });
 }
 // Create a dropdown selector for episodes
@@ -132,12 +136,16 @@ function episodesDropDownSelector() {
   selectField.addEventListener("change", function (event) {
     const selectedId = event.target.value; // get the selected episode ID
     state.selectedEpisodeId = selectedId === "all" ? "" : selectedId;
-    render()
+    render();
   });
 }
 
 // initialize the app when the page loads
 function setup() {
+  fetchShows().then(function (shows) {
+    state.shows = shows;
+    render(state.shows); // render the initial state
+  });
   render("Loading episodes, please wait..."); // render a loading message
   fetchEpisodes()
     .then(function (episodes) {
