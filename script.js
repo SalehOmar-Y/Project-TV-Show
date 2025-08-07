@@ -82,15 +82,6 @@ function render() {
     return; // stop rendering further
   }
 
-  // if (state.episodes.length === 0) {
-  //   // if there are no episodes, show a loading message
-  //   const loadingMessage = document.createElement("div");
-  //   loadingMessage.className = "loading-message"; // add a class for styling
-  //   loadingMessage.textContent = "Loading episodes, please wait..."; // set the loading message
-  //   rootElem.appendChild(loadingMessage); // add the loading message to the root element
-  //   return; // stop rendering further
-  // }
-
   // Only show shows if no show is selected
   if (state.selectedShowId === null) {
     const showsContainer = document.createElement("div"); // create a new container for the shows
@@ -99,6 +90,7 @@ function render() {
     showsContainer.append(...allShowsCards); // add all show cards to the container
     rootElem.appendChild(showsContainer); // add the container to the root element
   }
+
   // Only show episodes if a show is selected
   if (state.selectedShowId !== null) {
     const container = document.createElement("div"); // create a new container for the episodes
@@ -147,7 +139,7 @@ input.addEventListener("keyup", function () {
 function showsDropDownSelector() {
   const showSelection = document.getElementById("show-selection");
   // Clear old options
-  showSelection.innerHTML = ""; 
+  showSelection.innerHTML = "";
   // Default option: "All Shows"
   const defaultOption = document.createElement("option");
   defaultOption.value = "";
@@ -165,6 +157,7 @@ function showsDropDownSelector() {
     newOption.textContent = show.name;
     showSelection.append(newOption);
   });
+
   // Handle show selection
   showSelection.addEventListener("change", function (event) {
     const showId = event.target.value;
@@ -177,7 +170,7 @@ function showsDropDownSelector() {
 
       //  Clear episode dropdown
       const episodeSelection = document.getElementById("episode-selection");
-      episodeSelection.innerHTML = ""; 
+      episodeSelection.innerHTML = "";
       const defaultEpisodeOption = document.createElement("option");
       defaultEpisodeOption.value = "";
       defaultEpisodeOption.textContent = "Select Episode";
@@ -185,20 +178,24 @@ function showsDropDownSelector() {
       render();
       return;
     }
-    if (showId) {
-      fetchEpisodes(showId).then((episodes) => {
-        state.episodes = episodes;
-        state.selectedShowId = showId;
-        state.selectedEpisodeId = "";
-        state.searchTerm = ""; // Cleat the search filed
-        render();
-        episodesDropDownSelector();
-      })
-      .catch((error) => {
-        console.error("Sorry, there was a problem loading episodes.", error);
-      })
 
-      
+    if (showId) {
+      const rootElem = document.getElementById("root"); // get the root element
+      rootElem.textContent = "Loading episodes, please wait..."; // show loading message while the data is fetching
+      fetchEpisodes(showId)
+        .then((episodes) => {
+          state.episodes = episodes;
+          state.selectedShowId = showId;
+          state.selectedEpisodeId = "";
+          state.searchTerm = ""; // Cleat the search filed
+          render();
+          episodesDropDownSelector();
+        })
+        .catch((error) => {
+          console.error("Sorry, there was a problem loading episodes.", error);
+          rootElem.textContent = "Sorry, failed to load episodes.";
+
+        });
     }
   });
 }
@@ -228,11 +225,17 @@ function episodesDropDownSelector() {
 
 // initialize the app when the page loads
 function setup() {
+  const rootElem = document.getElementById("root"); // get the root element
+  rootElem.textContent = "Loading shows, please wait..."; // show loading message while the data is fetching
   fetchShows().then(function (shows) {
     state.shows = shows;
     render(); // render the shows only
     showsDropDownSelector();
-  });
+  })
+  .catch((error) => {
+    console.error("Error fetching shows:", error);
+    rootElem.textContent = "Sorry, there was a problem loading the shows. Please try again later.";
+  })
 }
 // run the setup function when the page loads
 window.onload = setup;
