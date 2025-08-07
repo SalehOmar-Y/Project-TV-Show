@@ -82,51 +82,53 @@ function render() {
     return; // stop rendering further
   }
 
-  if (state.episodes.length === 0) {
-    // if there are no episodes, show a loading message
-    const loadingMessage = document.createElement("div");
-    loadingMessage.className = "loading-message"; // add a class for styling
-    loadingMessage.textContent = "Loading episodes, please wait..."; // set the loading message
-    rootElem.appendChild(loadingMessage); // add the loading message to the root element
-    return; // stop rendering further
+  // if (state.episodes.length === 0) {
+  //   // if there are no episodes, show a loading message
+  //   const loadingMessage = document.createElement("div");
+  //   loadingMessage.className = "loading-message"; // add a class for styling
+  //   loadingMessage.textContent = "Loading episodes, please wait..."; // set the loading message
+  //   rootElem.appendChild(loadingMessage); // add the loading message to the root element
+  //   return; // stop rendering further
+  // }
+
+  // Only show shows if no show is selected
+  if (state.selectedShowId === null) {
+    const showsContainer = document.createElement("div"); // create a new container for the shows
+    showsContainer.className = "shows-container"; // add a class for styling
+    const allShowsCards = state.shows.map(createShowCard); // create a card for each show
+    showsContainer.append(...allShowsCards); // add all show cards to the container
+    rootElem.appendChild(showsContainer); // add the container to the root element
   }
-  const showsContainer = document.createElement("div"); // create a new container for the shows
-  showsContainer.className = "shows-container"; // add a class for styling
+  // Only show episodes if a show is selected
+  if (state.selectedShowId !== null) {
+    const container = document.createElement("div"); // create a new container for the episodes
+    container.className = "episodes-container"; // add a class for styling
 
-  const container = document.createElement("div"); // create a new container for the episodes
-  container.className = "episodes-container"; // add a class for styling
+    // filtering the episodes
+    const filteredEpisodes = state.episodes.filter(function (episode) {
+      if (state.selectedEpisodeId) {
+        // Return true only if episode.id matches the selected ID
+        return episode.id === Number(state.selectedEpisodeId);
+      }
+      // Otherwise, filter by search term as before
+      const titleMatches = episode.name
+        .toLowerCase() // match the search term in the title
+        .includes(state.searchTerm.toLowerCase());
+      const summaryMatches = episode.summary
+        .toLowerCase() // match the summary too
+        .includes(state.searchTerm.toLowerCase());
+      return titleMatches || summaryMatches; // keep episodes that match either the title or summary
+    });
 
-  // filtering the episodes
-  const filteredEpisodes = state.episodes.filter(function (episode) {
-    if (state.selectedEpisodeId) {
-      // Return true only if episode.id matches the selected ID
-      return episode.id === Number(state.selectedEpisodeId);
-    }
-    // Otherwise, filter by search term as before
-    const titleMatches = episode.name
-      .toLowerCase() // match the search term in the title
-      .includes(state.searchTerm.toLowerCase());
-    const summaryMatches = episode.summary
-      .toLowerCase() // match the summary too
-      .includes(state.searchTerm.toLowerCase());
-    return titleMatches || summaryMatches; // keep episodes that match either the title or summary
-  });
+    // update the filtered-info tag by showing how many episodes matched
+    const filteredMessage = document.getElementById("filtered-info");
+    filteredMessage.textContent = `Displaying ${filteredEpisodes.length}/${state.episodes.length}`;
 
-  // update the filtered-info tag by showing how many episodes matched
-  const filteredMessage = document.getElementById("filtered-info");
-  filteredMessage.textContent = `Displaying ${filteredEpisodes.length}/${state.episodes.length}`;
-
-  // create a card for each show
-  console.log(state.shows);
-  const allShowsCards = state.shows.map(createShowCard);
-  showsContainer.append(...allShowsCards); // add all show cards to the container
-  rootElem.appendChild(showsContainer); // add the container to the root element
-
-  // create a card for each episode that matched the search term
-  const allEpisodeCards = filteredEpisodes.map(createEpisodeCard);
-  container.append(...allEpisodeCards); // add all episode cards to the container
-  rootElem.appendChild(container); // add the container to the root element
-
+    // create a card for each episode that matched the search term
+    const allEpisodeCards = filteredEpisodes.map(createEpisodeCard);
+    container.append(...allEpisodeCards); // add all episode cards to the container
+    rootElem.appendChild(container); // add the container to the root element
+  }
   // create a footer with a link to TVMaze
   const footer = document.createElement("footer");
   footer.innerHTML = `Data originally from <a href="https://tvmaze.com/" target="_blank">TVMaze.com</a>`;
@@ -144,31 +146,61 @@ input.addEventListener("keyup", function () {
 // Create a dropdown selector for shows
 function showsDropDownSelector() {
   const showSelection = document.getElementById("show-selection");
-  // order the shows alphabetically
+  // Clear old options
+  showSelection.innerHTML = ""; 
+  // Default option: "All Shows"
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "All Shows";
+  showSelection.append(defaultOption);
+  
+  // Order the shows alphabetically
   const alphabeticallyOrderedShows = [...state.shows].sort((a, b) =>
     a.name.localeCompare(b.name)
   );
-  // create options
+  // Add one option per show
   alphabeticallyOrderedShows.sort().forEach((show) => {
     const newOption = document.createElement("option");
     newOption.value = show.id;
     newOption.textContent = show.name;
     showSelection.append(newOption);
   });
+  // Handle show selection
   showSelection.addEventListener("change", function (event) {
     const showId = event.target.value;
+    if (!showId) {
+      state.selectedShowId = null;
+      state.episodes = [];
+      state.selectedEpisodeId = "";
+      state.searchTerm = "";
+      input.value = "";
+      render();
+      return;
+    }
+
     if (showId) {
       fetchEpisodes(showId).then((episodes) => {
         state.episodes = episodes;
-        state.selectedShowId = null;
+        state.selectedShowId = showId;
+        state.selectedEpisodeId = "";
+        state.searchTerm = ""; // Cleat the search filed
         render();
-      });
+        episodesDropDownSelector();
+      })
+      .catch((error) => {
+        console.error("Failed to fetch episodes:", error);
+      })
+
+      
     }
   });
 }
 // Create a dropdown selector for episodes
 function episodesDropDownSelector() {
   const selectField = document.getElementById("episode-selection");
+  // Clear previous options
+  selectField.innerHTML = `<option value="all">All Episodes</option>`;
+
   // create options
   state.episodes.forEach((episode) => {
     const newOption = document.createElement("option");
@@ -179,7 +211,6 @@ function episodesDropDownSelector() {
     )}E${String(episode.number).padStart(2, "0")} - ${episode.name}`;
     selectField.append(newOption); // add the option to the select field
   });
-
   // Scroll to episode when selected
   selectField.addEventListener("change", function (event) {
     const selectedId = event.target.value; // get the selected episode ID
@@ -192,21 +223,21 @@ function episodesDropDownSelector() {
 function setup() {
   fetchShows().then(function (shows) {
     state.shows = shows;
-    render(); // render the initial state
+    render(); // render the shows only
     showsDropDownSelector();
   });
-  render("Loading episodes, please wait..."); // render a loading message
-  fetchEpisodes()
-    .then(function (episodes) {
-      state.episodes = episodes; // save the fetched episodes to the state
-      render(); // render the initial state
-      episodesDropDownSelector(); // populate the episodes dropdown selector
-      showsDropDownSelector(); // populate the shows dropdown selector
-    })
-    .catch(function (error) {
-      const root = document.getElementById("root");
-      root.textContent = "Sorry, there was a problem loading episodes.";
-    });
+  // render("Loading episodes, please wait..."); // render a loading message
+  // fetchEpisodes()
+  //   .then(function (episodes) {
+  //     state.episodes = episodes; // save the fetched episodes to the state
+  //     render(); // render the initial state
+  //     episodesDropDownSelector(); // populate the episodes dropdown selector
+  //     showsDropDownSelector(); // populate the shows dropdown selector
+  //   })
+  //   .catch(function (error) {
+  //     const root = document.getElementById("root");
+  //     root.textContent = "Sorry, there was a problem loading episodes.";
+  //   });
 }
 // run the setup function when the page loads
 window.onload = setup;
