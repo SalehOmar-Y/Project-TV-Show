@@ -14,6 +14,20 @@ body {
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+.show-card{
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.shows-container {
+  display: grid;           
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));  gap: 1rem;  /* space between cards */
+}
+.show-card img {
+  width: 100%;
+  border-radius: 4px;
+}
 
 .episode-card img {
   width: 100%;
@@ -24,6 +38,7 @@ body {
   display: grid;           
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));  gap: 1rem;  /* space between cards */
 }
+
 
 #filtered-info {
   margin-top: 0.5rem;
