@@ -15,7 +15,7 @@ function fetchEpisodes(showId) {
   return fetch(`https://api.tvmaze.com/shows/${showId}/episodes`)
     .then((response) => response.json())
     .then((data) => {
-      episodeCache[showId] = data; // ✅ store in cache
+      episodeCache[showId] = data; // store in cache
       return data;
     });
 }
@@ -49,6 +49,7 @@ function createEpisodeCard(episode) {
   return episodeCard; // return the full DOM  element
 }
 
+// Create a single show card element
 function createShowCard(show) {
   const showCard = document.createElement("div"); // create a new container for the show
   showCard.className = "show-card"; // add a class for styling
@@ -141,12 +142,14 @@ function render() {
 
 // we need to get the search filed from the DOM
 const input = document.getElementById("q");
+
 // we need to listen to the event when user type
 input.addEventListener("keyup", function () {
   // update the searchTerm
   state.searchTerm = input.value;
   render();
 });
+
 // Create a dropdown selector for shows
 function showsDropDownSelector() {
   const showSelection = document.getElementById("show-selection");
@@ -210,6 +213,7 @@ function showsDropDownSelector() {
     }
   });
 }
+
 // Create a dropdown selector for episodes
 function episodesDropDownSelector() {
   const selectField = document.getElementById("episode-selection");
@@ -250,5 +254,6 @@ function setup() {
         "Sorry, there was a problem loading the shows. Please try again later.";
     });
 }
+
 // run the setup function when the page loads
 window.onload = setup;
