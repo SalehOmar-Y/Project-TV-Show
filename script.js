@@ -86,9 +86,21 @@ function render() {
   if (state.selectedShowId === null) {
     const showsContainer = document.createElement("div"); // create a new container for the shows
     showsContainer.className = "shows-container"; // add a class for styling
-    const allShowsCards = state.shows.map(createShowCard); // create a card for each show
-    showsContainer.append(...allShowsCards); // add all show cards to the container
-    rootElem.appendChild(showsContainer); // add the container to the root element
+    const filteredShows = state.shows.filter((show) => {
+      const titleMatches = show.name
+        .toLowerCase()
+        .includes(state.searchTerm.toLowerCase());
+      const summaryMatches = show.summary
+        .toLowerCase()
+        .includes(state.searchTerm.toLowerCase());
+      return titleMatches || summaryMatches;
+    });
+    // Update filtered-info message
+    const filteredMessage = document.getElementById("filtered-info");
+    filteredMessage.textContent = `Displaying ${filteredShows.length}/${state.shows.length}`;
+    const filteredShowCards = filteredShows.map(createShowCard);
+    showsContainer.append(...filteredShowCards);
+    rootElem.appendChild(showsContainer);
   }
 
   // Only show episodes if a show is selected
@@ -194,7 +206,6 @@ function showsDropDownSelector() {
         .catch((error) => {
           console.error("Sorry, there was a problem loading episodes.", error);
           rootElem.textContent = "Sorry, failed to load episodes.";
-
         });
     }
   });
@@ -227,15 +238,17 @@ function episodesDropDownSelector() {
 function setup() {
   const rootElem = document.getElementById("root"); // get the root element
   rootElem.textContent = "Loading shows, please wait..."; // show loading message while the data is fetching
-  fetchShows().then(function (shows) {
-    state.shows = shows;
-    render(); // render the shows only
-    showsDropDownSelector();
-  })
-  .catch((error) => {
-    console.error("Error fetching shows:", error);
-    rootElem.textContent = "Sorry, there was a problem loading the shows. Please try again later.";
-  })
+  fetchShows()
+    .then(function (shows) {
+      state.shows = shows;
+      render(); // render the shows only
+      showsDropDownSelector();
+    })
+    .catch((error) => {
+      console.error("Error fetching shows:", error);
+      rootElem.textContent =
+        "Sorry, there was a problem loading the shows. Please try again later.";
+    });
 }
 // run the setup function when the page loads
 window.onload = setup;
