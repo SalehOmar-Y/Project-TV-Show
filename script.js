@@ -71,6 +71,16 @@ function createShowCard(show) {
 
 // render the full page based on the current state
 // === Step 1: Split render into renderShows and renderEpisodes ===
+async function fetchEpisodes(showId) {
+  try {
+    const response = await fetch(`https://api.tvmaze.com/shows/${showId}/episodes`);
+    if (!response.ok) throw new Error("Failed to fetch episodes");
+    const episodes = await response.json();
+    renderEpisodes(episodes);
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 function renderShows(showsList) {
   const rootElem = document.getElementById("root");
@@ -82,6 +92,8 @@ function renderShows(showsList) {
 
     const title = document.createElement("h2");
     title.textContent = show.name;
+    title.classList.add("clickable-title");
+    title.addEventListener("click", () => fetchEpisodes(show.id));
 
     const img = document.createElement("img");
     img.src = show.image?.medium || "";
