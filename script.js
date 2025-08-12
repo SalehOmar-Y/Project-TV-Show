@@ -70,75 +70,73 @@ function createShowCard(show) {
 }
 
 // render the full page based on the current state
-function render() {
-  const rootElem = document.getElementById("root"); // get the root element where we will render everything
-  rootElem.textContent = ""; // Clear the page
+// === Step 1: Split render into renderShows and renderEpisodes ===
 
-  if (state.shows.length === 0) {
-    // if there are no episodes, show a loading message
-    const loadingMessage = document.createElement("div");
-    loadingMessage.className = "loading-message"; // add a class for styling
-    loadingMessage.textContent = "Loading shows, please wait..."; // set the loading message
-    rootElem.appendChild(loadingMessage); // add the loading message to the root element
-    return; // stop rendering further
-  }
+function renderShows(showsList) {
+  const rootElem = document.getElementById("root");
+  rootElem.innerHTML = "";
 
-  // Only show shows if no show is selected
-  if (state.selectedShowId === null) {
-    const showsContainer = document.createElement("div"); // create a new container for the shows
-    showsContainer.className = "shows-container"; // add a class for styling
-    const filteredShows = state.shows.filter((show) => {
-      const titleMatches = show.name
-        .toLowerCase()
-        .includes(state.searchTerm.toLowerCase());
-      const summaryMatches = show.summary
-        .toLowerCase()
-        .includes(state.searchTerm.toLowerCase());
-      return titleMatches || summaryMatches;
-    });
-    // Update filtered-info message
-    const filteredMessage = document.getElementById("filtered-info");
-    filteredMessage.textContent = `Displaying ${filteredShows.length}/${state.shows.length}`;
-    const filteredShowCards = filteredShows.map(createShowCard);
-    showsContainer.append(...filteredShowCards);
-    rootElem.appendChild(showsContainer);
-  }
+  showsList.forEach(show => {
+    const card = document.createElement("div");
+    card.className = "show-card";
 
-  // Only show episodes if a show is selected
-  if (state.selectedShowId !== null) {
-    const container = document.createElement("div"); // create a new container for the episodes
-    container.className = "episodes-container"; // add a class for styling
+    const title = document.createElement("h2");
+    title.textContent = show.name;
 
-    // filtering the episodes
-    const filteredEpisodes = state.episodes.filter(function (episode) {
-      if (state.selectedEpisodeId) {
-        // Return true only if episode.id matches the selected ID
-        return episode.id === Number(state.selectedEpisodeId);
-      }
-      // Otherwise, filter by search term as before
-      const titleMatches = episode.name
-        .toLowerCase() // match the search term in the title
-        .includes(state.searchTerm.toLowerCase());
-      const summaryMatches = episode.summary
-        .toLowerCase() // match the summary too
-        .includes(state.searchTerm.toLowerCase());
-      return titleMatches || summaryMatches; // keep episodes that match either the title or summary
-    });
+    const img = document.createElement("img");
+    img.src = show.image?.medium || "";
+    img.alt = show.name;
 
-    // update the filtered-info tag by showing how many episodes matched
-    const filteredMessage = document.getElementById("filtered-info");
-    filteredMessage.textContent = `Displaying ${filteredEpisodes.length}/${state.episodes.length}`;
+    const summary = document.createElement("div");
+    summary.innerHTML = show.summary || "";
 
-    // create a card for each episode that matched the search term
-    const allEpisodeCards = filteredEpisodes.map(createEpisodeCard);
-    container.append(...allEpisodeCards); // add all episode cards to the container
-    rootElem.appendChild(container); // add the container to the root element
-  }
-  // create a footer with a link to TVMaze
-  const footer = document.createElement("footer");
-  footer.innerHTML = `Data originally from <a href="https://tvmaze.com/" target="_blank">TVMaze.com</a>`;
-  rootElem.appendChild(footer); // add the footer to thh bottom
+    card.appendChild(title);
+    card.appendChild(img);
+    card.appendChild(summary);
+
+    rootElem.appendChild(card);
+  });
 }
+
+function renderEpisodes(episodeList) {
+  const rootElem = document.getElementById("root");
+  rootElem.innerHTML = "";
+
+  episodeList.forEach(episode => {
+    const episodeContainer = document.createElement("div");
+    episodeContainer.className = "episode-card";
+
+    const title = document.createElement("h2");
+    title.innerText = `${episode.name} - S${String(episode.season).padStart(2, "0")}E${String(episode.number).padStart(2, "0")}`;
+
+    const img = document.createElement("img");
+    img.src = episode.image?.medium || "";
+    img.alt = episode.name;
+
+    const summary = document.createElement("div");
+    summary.innerHTML = episode.summary || "";
+
+    episodeContainer.appendChild(title);
+    episodeContainer.appendChild(img);
+    episodeContainer.appendChild(summary);
+
+    rootElem.appendChild(episodeContainer);
+  });
+}
+
+// Updated main render function
+function render(dataList) {
+  if (!Array.isArray(dataList)) return;
+
+  if (dataList.length && dataList[0].hasOwnProperty("genres")) {
+    // It's a shows list
+    renderShows(dataList);
+  } else {
+    // It's an episodes list
+    renderEpisodes(dataList);
+  }
+}
+
 
 // we need to get the search filed from the DOM
 const input = document.getElementById("q");
