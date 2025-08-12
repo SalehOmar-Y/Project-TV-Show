@@ -90,9 +90,25 @@ function renderShows(showsList) {
     const summary = document.createElement("div");
     summary.innerHTML = show.summary || "";
 
+    const genres = document.createElement("p");
+    genres.textContent = `Genres: ${show.genres.join(", ")}`;
+
+    const status = document.createElement("p");
+    status.textContent = `Status: ${show.status}`;
+
+    const rating = document.createElement("p");
+    rating.textContent = `Rating: ${show.rating?.average || "N/A"}`;
+
+    const runtime = document.createElement("p");
+    runtime.textContent = `Runtime: ${show.runtime || "N/A"} minutes`;
+
     card.appendChild(title);
     card.appendChild(img);
     card.appendChild(summary);
+    card.appendChild(genres);
+    card.appendChild(status);
+    card.appendChild(rating);
+    card.appendChild(runtime);
 
     rootElem.appendChild(card);
   });
