@@ -17,6 +17,23 @@ function setErrorMessage(container, message) {
   container.innerHTML = `<div class="error">${message}</div>`;
 }
 
+function updateMatchCount(filteredItems, type = "episodes") {
+  let countElem = document.getElementById("match-count");
+  if (!countElem) {
+    countElem = document.createElement("div");
+    countElem.id = "match-count";
+    countElem.className = "match-count";
+    const root = document.getElementById("root");
+    root.insertBefore(countElem, root.firstChild.nextSibling); 
+  }
+
+  if (type === "episodes") {
+    countElem.textContent = `Displaying ${filteredItems.length} / ${state.episodes.length} episodes`;
+  } else if (type === "shows") {
+    countElem.textContent = `Displaying ${filteredItems.length} / ${state.shows.length} shows`;
+  }
+}
+
 // we need to fetch shows using url
 function fetchShows() {
   return fetch("https://api.tvmaze.com/shows").then(response =>
@@ -52,37 +69,48 @@ function renderShowsListing() {
     a.name.localeCompare(b.name)
   );
 
+    // Show selection dropdown (added)
+  let showSelect = document.getElementById("show-selection");
+  if (!showSelect) {
+    showSelect = document.createElement("select");
+    showSelect.id = "show-selection";
+    root.appendChild(showSelect);
+  }
+  showSelect.innerHTML = `<option value="">All Shows</option>`;
+  sortedShows.forEach(show => {
+    const opt = document.createElement("option");
+    opt.value = show.id;
+    opt.textContent = show.name;
+    showSelect.appendChild(opt);
+  });
+
+  showSelect.addEventListener("change", () => {
+    const selectedId = showSelect.value;
+    if (!selectedId) {
+      displayShows(sortedShows); // back to full list
+    } else {
+      const selectedShow = sortedShows.find(s => s.id == selectedId);
+      if (selectedShow) {
+        state.selectedShowId = selectedShow.id;
+        setLoadingMessage(root, "Loading episodes...");
+        fetchEpisodes(selectedShow.id)
+          .then(episodes => {
+            state.episodes = episodes;
+            renderEpisodesWithSearch(root, episodes);
+          })
+          .catch(() => {
+            setErrorMessage(root, "Failed to load episodes.");
+          });
+      }
+    }
+  });
+
   // Search input
   const searchInput = document.createElement("input");
   searchInput.type = "text";
   searchInput.placeholder = "Search shows by name, genre, or summary...";
   root.appendChild(searchInput);
 
-    const showSelect = document.getElementById("show-selection");
-    if (showSelect) {
-    showSelect.innerHTML = '<option value="">All Shows</option>';
-    state.shows.forEach(show => {
-      const opt = document.createElement("option");
-      opt.value = show.id;
-      opt.textContent = show.name;
-      showSelect.appendChild(opt);
-    });
-
-    showSelect.onchange = function () {
-      const selectedId = showSelect.value;
-      if (!selectedId) {
-        renderShowsListing();
-      } else {
-        setLoadingMessage(root, "Loading episodes...");
-        fetchEpisodes(selectedId).then(episodes => {
-          state.episodes = episodes;
-          renderEpisodesWithSearch(root, episodes);
-        }).catch(() => {
-          setErrorMessage(root, "Failed to load episodes.");
-        });
-      }
-    };
-  }
   
   // Shows container
   const showsContainer = document.createElement("div");
@@ -93,6 +121,7 @@ function renderShowsListing() {
     showsContainer.innerHTML = "";
     if (shows.length === 0) {
       showsContainer.innerHTML = `<p class="no-results">No shows found.</p>`;
+      updateMatchCount([], "shows");
       return;
     }
 
@@ -104,7 +133,7 @@ function renderShowsListing() {
       title.textContent = show.name;
 
       const img = document.createElement("img");
-      img.src = show.image?.medium || "";
+      img.src = show.image?.medium || "placeholder.jpg";
       img.alt = show.name;
 
       const summary = document.createElement("p");
@@ -122,10 +151,12 @@ function renderShowsListing() {
       card.addEventListener("click", () => {
         state.selectedShowId = show.id;
         setLoadingMessage(root, "Loading episodes...");
-        fetchEpisodes(show.id).then(episodes => {
+        fetchEpisodes(show.id)
+        .then(episodes => {
           state.episodes = episodes;
           renderEpisodesWithSearch(root, episodes);
-        }).catch(() => {
+        })
+        .catch(() => {
           setErrorMessage(root, "Failed to load episodes.");
         });
       });
@@ -136,10 +167,13 @@ function renderShowsListing() {
       card.appendChild(details);
       showsContainer.appendChild(card);
     });
+
+    updateMatchCount(shows, "shows");
+
   }
 
 
- displayShows(sortedShows);
+  displayShows(sortedShows);
 
   // Filter search
   searchInput.addEventListener("input", () => {
@@ -168,29 +202,34 @@ function renderEpisodesWithSearch(container, episodesList) {
   searchInput.className = "search-input";
   container.appendChild(searchInput);
 
-  const filteredInfo = document.createElement("div");
-  filteredInfo.className = "filtered-list";
-  container.appendChild(filteredInfo);
+  let episodeSelect = document.getElementById("episode-selection");
+  if (!episodeSelect) {
+    episodeSelect = document.createElement("select");
+    episodeSelect.id = "episode-selection";
+    container.appendChild(episodeSelect);
+  }
+  episodeSelect.innerHTML = `<option value="">All Episodes</option>`;
+  episodesList.forEach(ep => {
+    const opt = document.createElement("option");
+    opt.value = ep.id;
+    opt.textContent = `S${String(ep.season).padStart(2,"0")}E${String(ep.number).padStart(2,"0")} - ${ep.name}`;
+    episodeSelect.appendChild(opt);
+  });
 
   const list = document.createElement("div");
   list.className = "episodes-list";
   container.appendChild(list);
 
-
-  function display(episodes) {
-    const q = searchInput.value.toLowerCase();
-    const filtered = episodes.filter(
-      ep => ep.name.toLowerCase().includes(q) ||
-            (ep.summary && ep.summary.toLowerCase().includes(q))
-    );
-
-    filteredInfo.textContent = `Matching episodes: ${filtered.length}`;
-    if (filtered.length === 0) {
+function display(filteredEpisodes) {
+  list.innerHTML = "";
+  if (filteredEpisodes.length === 0) {
       list.innerHTML = `<p class="no-results">No episodes found.</p>`;
+      updateMatchCount([], "episodes");
       return;
     }
 
-    filtered.forEach(ep => {
+
+    filteredEpisodes.forEach(ep => {
       const card = document.createElement("div");
       card.className = "episode-card";
 
@@ -209,17 +248,34 @@ function renderEpisodesWithSearch(container, episodesList) {
       card.appendChild(summary);
       list.appendChild(card);
     });
+
+    updateMatchCount(filteredEpisodes, "episodes");
   }
 
-  display(episodesList);
-
-  searchInput.addEventListener("input", () => {
+  function filterEpisodes() {
     const q = searchInput.value.toLowerCase();
-    const filtered = episodesList.filter(
-      ep => ep.name.toLowerCase().includes(q) || (ep.summary && ep.summary.toLowerCase().includes(q))
-    );
+    const selectedId = episodeSelect.value;
+
+    let filtered = episodesList;
+
+    if (selectedId) {
+      filtered = filtered.filter(ep => ep.id == selectedId);
+    }
+
+    if (q) {
+      filtered = filtered.filter(
+        ep => ep.name.toLowerCase().includes(q) || (ep.summary && ep.summary.toLowerCase().includes(q))
+      );
+    }
+
     display(filtered);
-  });
+   
+  }
+
+  searchInput.addEventListener("input", filterEpisodes);
+  episodeSelect.addEventListener("change", filterEpisodes);
+
+  display(episodesList);
 }
 
 // initialize the app when the page loads
