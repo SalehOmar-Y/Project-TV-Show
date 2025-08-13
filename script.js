@@ -38,6 +38,11 @@ function fetchEpisodes(showId) {
     });
 }
 
+function stripHTML(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+}
 
 function renderShowsListing() {
   const root = document.getElementById("root");
@@ -112,7 +117,7 @@ function renderShowsListing() {
     const filtered = state.shows.filter(show =>
       show.name.toLowerCase().includes(q) ||
       show.genres.join(" ").toLowerCase().includes(q) ||
-      (show.summary && show.summary.toLowerCase().includes(q))
+      (show.summary && stripHTML(show.summary).toLowerCase().includes(q))
     );
     displayShows(filtered);
   });
