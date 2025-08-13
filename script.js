@@ -139,12 +139,12 @@ function renderShowsListing() {
   }
 
 
- displayShows(state.shows);
+ displayShows(sortedShows);
 
   // Filter search
   searchInput.addEventListener("input", () => {
     const q = searchInput.value.toLowerCase();
-    const filtered = state.shows.filter(show =>
+    const filtered = sortedShows.filter(show =>
       show.name.toLowerCase().includes(q) ||
       show.genres.join(" ").toLowerCase().includes(q) ||
       (show.summary && stripHTML(show.summary).toLowerCase().includes(q))
