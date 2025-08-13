@@ -47,6 +47,10 @@ function stripHTML(html) {
 function renderShowsListing() {
   const root = document.getElementById("root");
   root.innerHTML = "";
+  
+  const sortedShows = [...state.shows].sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
 
   // Search input
   const searchInput = document.createElement("input");
@@ -55,7 +59,7 @@ function renderShowsListing() {
   root.appendChild(searchInput);
 
     const showSelect = document.getElementById("show-selection");
-  if (showSelect) {
+    if (showSelect) {
     showSelect.innerHTML = '<option value="">All Shows</option>';
     state.shows.forEach(show => {
       const opt = document.createElement("option");
