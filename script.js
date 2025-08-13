@@ -54,6 +54,32 @@ function renderShowsListing() {
   searchInput.placeholder = "Search shows by name, genre, or summary...";
   root.appendChild(searchInput);
 
+    const showSelect = document.getElementById("show-selection");
+  if (showSelect) {
+    showSelect.innerHTML = '<option value="">All Shows</option>';
+    state.shows.forEach(show => {
+      const opt = document.createElement("option");
+      opt.value = show.id;
+      opt.textContent = show.name;
+      showSelect.appendChild(opt);
+    });
+
+    showSelect.onchange = function () {
+      const selectedId = showSelect.value;
+      if (!selectedId) {
+        renderShowsListing();
+      } else {
+        setLoadingMessage(root, "Loading episodes...");
+        fetchEpisodes(selectedId).then(episodes => {
+          state.episodes = episodes;
+          renderEpisodesWithSearch(root, episodes);
+        }).catch(() => {
+          setErrorMessage(root, "Failed to load episodes.");
+        });
+      }
+    };
+  }
+  
   // Shows container
   const showsContainer = document.createElement("div");
   showsContainer.className = "shows-container";
