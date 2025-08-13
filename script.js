@@ -168,18 +168,29 @@ function renderEpisodesWithSearch(container, episodesList) {
   searchInput.className = "search-input";
   container.appendChild(searchInput);
 
+  const filteredInfo = document.createElement("div");
+  filteredInfo.className = "filtered-list";
+  container.appendChild(filteredInfo);
+
   const list = document.createElement("div");
   list.className = "episodes-list";
   container.appendChild(list);
 
 
   function display(episodes) {
-    if (episodes.length === 0) {
+    const q = searchInput.value.toLowerCase();
+    const filtered = episodes.filter(
+      ep => ep.name.toLowerCase().includes(q) ||
+            (ep.summary && ep.summary.toLowerCase().includes(q))
+    );
+
+    filteredInfo.textContent = `Matching episodes: ${filtered.length}`;
+    if (filtered.length === 0) {
       list.innerHTML = `<p class="no-results">No episodes found.</p>`;
       return;
     }
 
-    episodes.forEach(ep => {
+    filtered.forEach(ep => {
       const card = document.createElement("div");
       card.className = "episode-card";
 
